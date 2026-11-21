@@ -1,0 +1,68 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  background: #eef3f9;
+  color: #1a2433;
+  min-height: 100dvh;
+}
+
+.wadah {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 24px 20px;
+}
+
+.kartu {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .06);
+  margin-bottom: 16px;
+}
+
+.judul {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0b5cab;
+  margin-bottom: 4px;
+}
+
+.redup { color: #6b7686; font-size: 14px; }
+
+label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 16px 0 6px;
+}
+
+input {
+  width: 100%;
+  font-size: 20px;
+  padding: 12px 14px;
+  border: 1.5px solid #cfd8e3;
+  border-radius: 12px;
+  outline: none;
+}
+input:focus { border-color: #0b5cab; }
+
+.pin { letter-spacing: 10px; text-align: center; }
+
+button {
+  width: 100%;
+  margin-top: 20px;
+  padding: 14px;
+  font-size: 17px;
+  font-weight: 700;
+  border: 0;
+  border-radius: 12px;
+  background: #0b5cab;
+  color: #fff;
+}
+button:disabled { opacity: .5; }
+button.tipis { background: #e3eaf3; color: #0b5cab; }
+
+.galat { color: #c62828; font-size: 14px; margin-top: 12px; }
+
+.saldo { font-size: 30px; font-weight: 800; margin: 6px 0; }
