@@ -28,6 +28,20 @@ export default function FormTransaksi() {
   // dipakai ulang kalau simpan diulang (mis. sinyal putus)
   const kunci = useRef<string | null>(null)
 
+  // RESET setiap kali halaman ini tampil lagi.
+  // Next.js bisa menyimpan keadaan halaman yang pernah dibuka;
+  // tanpa ini, setor kedua ke rekening yang sama langsung
+  // muncul di layar konfirmasi/tersimpan transaksi sebelumnya.
+  useEffect(() => {
+    setTahap('isi')
+    setAngka('')
+    setCatatan('')
+    setHasil(null)
+    setPesan('')
+    setSibuk(false)
+    kunci.current = null
+  }, [id, jenis])
+
   useEffect(() => {
     if (!pengguna) return
     ambilRekening(id)

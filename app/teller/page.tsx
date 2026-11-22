@@ -17,6 +17,14 @@ export default function TellerBeranda() {
   const [cari, setCari] = useState('')
   const [mode, setMode] = useState<Mode>(null)
   const [pesan, setPesan] = useState('')
+  const [tgl, setTgl] = useState('')
+
+  // Tanggal dihitung di HP setelah halaman tampil, BUKAN saat render.
+  // Kalau dihitung saat render, Next.js bisa membekukannya
+  // di tanggal saat aplikasi di-build (peringatan "new Date()").
+  useEffect(() => {
+    setTgl(tanggalHariIni())
+  }, [])
 
   useEffect(() => {
     if (!pengguna) return
@@ -56,7 +64,7 @@ export default function TellerBeranda() {
               {pengguna?.nama ?? '…'}
             </span>
           </div>
-          <span style={{ fontSize: 12, color: '#CDE9F1' }}>{tanggalHariIni()}</span>
+          <span style={{ fontSize: 12, color: '#CDE9F1' }}>{tgl}</span>
           <button className="tombol-ikon" onClick={keluar} aria-label="Keluar">
             <Ikon nama="logout" ukuran={20} />
           </button>

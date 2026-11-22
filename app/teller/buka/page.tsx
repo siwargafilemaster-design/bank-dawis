@@ -17,6 +17,13 @@ export default function BukaRekening() {
   const [sibuk, setSibuk] = useState(false)
   const [pesan, setPesan] = useState('')
 
+  // RESET tiap kali halaman tampil lagi (alasan sama dgn form setor/tarik)
+  useEffect(() => {
+    setPilih(null)
+    setSibuk(false)
+    setPesan('')
+  }, [])
+
   useEffect(() => {
     if (!pengguna) return
     wargaTanpaRekening()
