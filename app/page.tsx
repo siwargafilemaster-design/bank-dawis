@@ -2,126 +2,70 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { usePengguna, keluar } from '@/lib/sesi'
 import { supabase } from '@/lib/supabase'
+import { rupiah } from '@/lib/format'
 
-type Pengguna = {
-  nama: string
-  peran: string[]
-  warga_id: string | null
-}
-
-type Rekening = {
-  no_rekening: string
-  saldo: number
-  status: string
-}
-
-const rupiah = (n: number) => 'Rp ' + n.toLocaleString('id-ID')
+type RekSaya = { no_rekening: string; saldo: number; status: string }
 
 export default function Beranda() {
   const router = useRouter()
-  const [saya, setSaya] = useState<Pengguna | null>(null)
-  const [rekSaya, setRekSaya] = useState<Rekening | null>(null)
-  const [jumlahRek, setJumlahRek] = useState<number | null>(null)
-  const [pesan, setPesan] = useState('Memuat…')
+  const { pengguna, galat } = usePengguna()
+  const [rek, setRek] = useState<RekSaya | null>(null)
+  const [siap, setSiap] = useState(false)
 
   useEffect(() => {
+    if (!pengguna) return
+    if (pengguna.peran.includes('teller')) {
+      router.replace('/teller')
+      return
+    }
+
+    const wargaId = pengguna.warga_id
     async function muat() {
-      // TUNGGU sesi pulih dulu, baru query
-      // (pelajaran bug 42501 di app Bendahara)
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-
-      if (!session) {
-        router.replace('/login')
-        return
-      }
-
-      const { data: p, error } = await supabase
-        .from('pengguna')
-        .select('nama, peran, warga_id')
-        .eq('user_id', session.user.id)
-        .maybeSingle()
-
-      if (error) {
-        setPesan('Gagal memuat: ' + error.message)
-        return
-      }
-      if (!p) {
-        setPesan('Akun ini belum terdaftar di Bank Dawis. Hubungi teller.')
-        return
-      }
-      setSaya(p)
-
-      if (p.warga_id) {
-        const { data: r } = await supabase
+      if (wargaId) {
+        const { data } = await supabase
           .from('rekening')
           .select('no_rekening, saldo, status')
-          .eq('warga_id', p.warga_id)
+          .eq('warga_id', wargaId)
           .maybeSingle()
-        setRekSaya(r)
+        setRek(data)
       }
-
-      if (p.peran.includes('teller') || p.peran.includes('pengawas')) {
-        const { count } = await supabase
-          .from('rekening')
-          .select('id', { count: 'exact', head: true })
-        setJumlahRek(count ?? 0)
-      }
-
-      setPesan('')
+      setSiap(true)
     }
     muat()
-  }, [router])
+  }, [pengguna, router])
 
-  async function keluar() {
-    await supabase.auth.signOut()
-    router.replace('/login')
-  }
+  if (galat) return <main className="layar"><div className="kartu" style={{ marginTop: 40 }}>{galat}</div></main>
+  if (!siap) return <main className="layar"><p className="redup" style={{ padding: 40 }}>Memuat…</p></main>
 
   return (
-    <main className="wadah">
-      <p className="redup" style={{ marginBottom: 12 }}>
-        🧪 Halaman uji login — diganti di Tahap 3
+    <main className="layar">
+      <div className="kepala" style={{ paddingBottom: 96 }}>
+        <p style={{ fontSize: 12, color: '#CDE9F1' }}>Selamat datang,</p>
+        <p style={{ fontSize: 17, fontWeight: 600 }}>{pengguna?.nama}</p>
+      </div>
+
+      <div className="kartu kartu-apung">
+        <p className="redup">Saldo tabungan</p>
+        {rek ? (
+          <>
+            <p className="angka-besar">{rupiah(rek.saldo)}</p>
+            <p className="redup kecil">{rek.no_rekening}</p>
+          </>
+        ) : (
+          <p style={{ marginTop: 8 }}>Belum punya rekening. Hubungi teller.</p>
+        )}
+      </div>
+
+      <p className="redup kecil" style={{ margin: '16px 20px' }}>
+        Halaman nasabah lengkap menyusul di Tahap 4.
       </p>
 
-      {pesan && <div className="kartu">{pesan}</div>}
-
-      {saya && (
-        <>
-          <div className="kartu">
-            <p className="redup">Masuk sebagai</p>
-            <p className="judul">{saya.nama}</p>
-            <p className="redup">Peran: {saya.peran.join(', ')}</p>
-          </div>
-
-          <div className="kartu">
-            <p className="redup">Tabungan saya</p>
-            {rekSaya ? (
-              <>
-                <p className="saldo">{rupiah(rekSaya.saldo)}</p>
-                <p className="redup">
-                  {rekSaya.no_rekening} · {rekSaya.status}
-                </p>
-              </>
-            ) : (
-              <p>Belum punya rekening</p>
-            )}
-          </div>
-
-          {jumlahRek !== null && (
-            <div className="kartu">
-              <p className="redup">Rekening yang bisa saya lihat</p>
-              <p className="saldo">{jumlahRek}</p>
-            </div>
-          )}
-
-          <button className="tipis" onClick={keluar}>
-            Keluar
-          </button>
-        </>
-      )}
+      <div className="dorong" />
+      <div style={{ padding: '0 20px' }}>
+        <button className="tombol garis" onClick={keluar}>Keluar</button>
+      </div>
     </main>
   )
 }

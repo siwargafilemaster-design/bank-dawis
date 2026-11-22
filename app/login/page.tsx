@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, type FormEvent } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { emailDariHp, normalWa } from '@/lib/nomor'
@@ -45,42 +46,58 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="wadah">
-      <div className="kartu">
-        <p className="judul">Bank Dawis</p>
-        <p className="redup">Masuk dengan nomor HP dan PIN</p>
-
-        <form onSubmit={masuk}>
-          <label htmlFor="hp">Nomor HP</label>
-          <input
-            id="hp"
-            type="tel"
-            inputMode="tel"
-            autoComplete="username"
-            placeholder="08xx xxxx xxxx"
-            value={hp}
-            onChange={(e) => setHp(e.target.value)}
-          />
-
-          <label htmlFor="pin">PIN</label>
-          <input
-            id="pin"
-            className="pin"
-            type="password"
-            inputMode="numeric"
-            autoComplete="current-password"
-            maxLength={6}
-            value={pin}
-            onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
-          />
-
-          {galat && <p className="galat">{galat}</p>}
-
-          <button type="submit" disabled={sibuk}>
-            {sibuk ? 'Memeriksa…' : 'Masuk'}
-          </button>
-        </form>
+    <main className="layar" style={{ background: '#fff', padding: '56px 28px 32px' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 32 }}>
+        <Image
+          src="/logo.jpg"
+          alt="Bank Dawis"
+          width={260}
+          height={130}
+          priority
+          style={{ objectFit: 'cover' }}
+        />
       </div>
+
+      <h1 style={{ fontSize: 22, fontWeight: 600 }}>Selamat datang</h1>
+      <p className="redup" style={{ fontSize: 14, marginTop: 4 }}>
+        Masuk dengan nomor HP dan PIN Ibu
+      </p>
+
+      <form onSubmit={masuk} style={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+        <label className="label" htmlFor="hp">Nomor HP</label>
+        <input
+          id="hp"
+          className="isian"
+          type="tel"
+          inputMode="tel"
+          autoComplete="username"
+          placeholder="08xx xxxx xxxx"
+          value={hp}
+          onChange={(e) => setHp(e.target.value)}
+        />
+
+        <label className="label" htmlFor="pin">PIN</label>
+        <input
+          id="pin"
+          className="isian pin"
+          type="password"
+          inputMode="numeric"
+          autoComplete="current-password"
+          maxLength={6}
+          value={pin}
+          onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
+        />
+        <p className="redup kecil" style={{ marginTop: 10 }}>
+          Lupa PIN? Minta teller untuk mereset.
+        </p>
+
+        {galat && <p className="galat">{galat}</p>}
+
+        <div className="dorong" />
+        <button className="tombol" type="submit" disabled={sibuk} style={{ marginTop: 24 }}>
+          {sibuk ? 'Memeriksa…' : 'Masuk'}
+        </button>
+      </form>
     </main>
   )
 }
