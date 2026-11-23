@@ -13,7 +13,7 @@ export function Memuat({ teks = 'Memuat…' }: { teks?: string }) {
           className="pemuat-logo"
         />
       </div>
-      <p>{teks}</p>
+     <span className="tersembunyi">{teks}</span>
     </main>
   )
 }
