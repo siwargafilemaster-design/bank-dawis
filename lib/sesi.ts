@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { supabase } from './supabase'
 
 export type Pengguna = {
@@ -9,12 +9,14 @@ export type Pengguna = {
   nama: string
   peran: string[]
   warga_id: string | null
+  wajib_ganti_pin: boolean
 }
 
 // Dipakai semua halaman yang butuh login.
 // perluPeran: kalau diisi dan akun tak punya peran itu → dilempar ke '/'
 export function usePengguna(perluPeran?: string) {
   const router = useRouter()
+  const pathname = usePathname()
   const [pengguna, setPengguna] = useState<Pengguna | null>(null)
   const [galat, setGalat] = useState('')
 
@@ -34,7 +36,7 @@ export function usePengguna(perluPeran?: string) {
 
       const { data, error } = await supabase
         .from('pengguna')
-        .select('user_id, nama, peran, warga_id')
+        .select('user_id, nama, peran, warga_id, wajib_ganti_pin')
         .eq('user_id', session.user.id)
         .maybeSingle()
 
@@ -47,6 +49,13 @@ export function usePengguna(perluPeran?: string) {
         setGalat('Akun ini belum terdaftar di Bank Dawis. Hubungi teller.')
         return
       }
+
+      // PIN dari teller → wajib diganti dulu sebelum boleh ke mana pun
+      if (data.wajib_ganti_pin && pathname !== '/ganti-pin') {
+        router.replace('/ganti-pin')
+        return
+      }
+
       if (perluPeran && !data.peran.includes(perluPeran)) {
         router.replace('/')
         return
@@ -58,7 +67,7 @@ export function usePengguna(perluPeran?: string) {
     return () => {
       batal = true
     }
-  }, [router, perluPeran])
+  }, [router, pathname, perluPeran])
 
   return { pengguna, galat }
 }

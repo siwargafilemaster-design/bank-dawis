@@ -179,3 +179,47 @@ label.label { display: block; font-size: 13px; font-weight: 600; margin: 16px 0 
 }
 .rincian div { display: flex; justify-content: space-between; gap: 12px; }
 .catatan-biru { margin: 20px 8px 0; text-align: center; font-size: 13px; line-height: 1.6; color: #CDE9F1; }
+
+/* ---------- Tahap 3C: lembar bawah, akses, aksi bahaya ---------- */
+.lembar-latar {
+  position: fixed; inset: 0; z-index: 50;
+  background: rgba(15, 30, 40, .45);
+  display: flex; align-items: flex-end; justify-content: center;
+}
+.lembar {
+  background: #fff; width: 100%; max-width: 480px;
+  border-radius: 24px 24px 0 0; padding: 16px 20px 28px;
+  max-height: 90dvh; overflow-y: auto;
+}
+.lembar-kepala {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 8px;
+}
+.lembar-kepala h2 { font-size: 17px; font-weight: 600; }
+.lembar-kepala button {
+  width: 44px; height: 44px; border: 0; background: none;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.kotak-akses {
+  margin: 16px 20px 0; background: #fff; border-radius: 16px;
+  padding: 14px 16px; display: flex; align-items: center; gap: 12px;
+}
+.titik { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.tombol-kecil {
+  height: 40px; padding: 0 14px; border: 0; border-radius: 10px; flex-shrink: 0;
+  background: #E3F4F9; color: var(--utama); font-size: 13px; font-weight: 600;
+}
+
+.tombol.bahaya { background: var(--merah); }
+.tombol.garis-bahaya { background: #fff; border: 1.5px solid #E7C3B4; color: var(--merah); }
+
+.centang { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 1.5; margin-top: 16px; }
+.centang input { width: 22px; height: 22px; flex-shrink: 0; margin-top: 1px; accent-color: var(--utama); }
+
+.baris:disabled { cursor: default; }
+.ringkas {
+  background: var(--latar); border-radius: 14px; padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 6px; font-size: 14px;
+}
+.ringkas div { display: flex; justify-content: space-between; gap: 12px; }

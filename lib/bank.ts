@@ -14,7 +14,13 @@ export type Rekening = {
   saldo: number
   status: 'aktif' | 'ditutup'
   dibuka_pada: string
-  warga: Omit<Warga, 'id'> | null
+  warga_id: string
+  warga: {
+    no_rumah: string
+    nama_kk: string
+    tgl_keluar: string | null
+    no_wa: string
+  } | null
 }
 
 export type Mutasi = {
@@ -29,7 +35,7 @@ export type Mutasi = {
 }
 
 const KOLOM_REK =
-  'id, no_rekening, saldo, status, dibuka_pada, warga(no_rumah, nama_kk, tgl_keluar)'
+  'id, no_rekening, saldo, status, dibuka_pada, warga_id, warga(no_rumah, nama_kk, tgl_keluar, no_wa)'
 
 const KOLOM_MUTASI =
   'id, jenis, nominal, saldo_setelah, catatan, teller_nama, koreksi_dari, dibuat'
@@ -37,6 +43,8 @@ const KOLOM_MUTASI =
 export function sudahKeluar(w: { tgl_keluar: string | null } | null): boolean {
   return !!w?.tgl_keluar && w.tgl_keluar <= hariIniWIB()
 }
+
+// ===================== BACA =====================
 
 export async function daftarRekening(): Promise<Rekening[]> {
   const { data, error } = await supabase
@@ -102,6 +110,19 @@ export async function wargaTanpaRekening(): Promise<Warga[]> {
   )
 }
 
+export async function statusAkun(
+  wargaId: string
+): Promise<{ ada: boolean; wajibGantiPin: boolean }> {
+  const { data, error } = await supabase.rpc('bank_akun_warga', {
+    p_warga_id: wargaId,
+  })
+  if (error) throw error
+  const baris = (data ?? [])[0]
+  return { ada: !!baris, wajibGantiPin: !!baris?.wajib_ganti_pin }
+}
+
+// ===================== TULIS (lewat fungsi database) =====================
+
 export async function bukaRekening(wargaId: string): Promise<string> {
   const { data, error } = await supabase.rpc('bank_buka_rekening', {
     p_warga_id: wargaId,
@@ -126,4 +147,57 @@ export async function simpanTransaksi(p: {
   })
   if (error) throw new Error(error.message)
   return data as Mutasi
+}
+
+export async function koreksiMutasi(mutasiId: number, alasan: string): Promise<void> {
+  const { error } = await supabase.rpc('bank_koreksi', {
+    p_mutasi_id: mutasiId,
+    p_alasan: alasan.trim(),
+  })
+  if (error) throw new Error(error.message)
+}
+
+export async function tutupRekening(rekeningId: string, catatan: string): Promise<void> {
+  const { error } = await supabase.rpc('bank_tutup_rekening', {
+    p_rekening_id: rekeningId,
+    p_catatan: catatan.trim() || null,
+  })
+  if (error) throw new Error(error.message)
+}
+
+// ===================== AKUN (lewat server /api/akun) =====================
+
+export async function kelolaAkun(
+  aksi: 'buat' | 'reset',
+  wargaId: string,
+  pin: string
+): Promise<void> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  if (!session) throw new Error('Sesi habis, silakan login ulang')
+
+  const res = await fetch('/api/akun', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify({ aksi, wargaId, pin }),
+  })
+  const isi = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(isi.galat ?? 'Gagal menghubungi server')
+}
+
+export async function gantiPin(pinBaru: string): Promise<void> {
+  const { error } = await supabase.auth.updateUser({ password: pinBaru })
+  if (error) {
+    throw new Error(
+      error.message.toLowerCase().includes('different')
+        ? 'PIN baru harus berbeda dari PIN lama'
+        : 'Gagal mengganti PIN: ' + error.message
+    )
+  }
+  const { error: e2 } = await supabase.rpc('selesai_ganti_pin')
+  if (e2) throw new Error(e2.message)
 }

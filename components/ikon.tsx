@@ -10,6 +10,8 @@ const JALUR = {
   hapus: <><path d="M21 5H9l-6 7 6 7h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1z" /><path d="M17 9l-6 6" /><path d="M11 9l6 6" /></>,
   info: <><circle cx="12" cy="12" r="10" /><path d="M12 8v4" /><path d="M12 16h.01" /></>,
   hp: <><rect x="7" y="2" width="10" height="20" rx="2" /><path d="M11 18h2" /></>,
+  silang: <><path d="M18 6L6 18" /><path d="M6 6l12 12" /></>,
+  gembok: <><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></>,
 }
 
 export type NamaIkon = keyof typeof JALUR
