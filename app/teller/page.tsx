@@ -18,10 +18,8 @@ export default function TellerBeranda() {
   const [mode, setMode] = useState<Mode>(null)
   const [pesan, setPesan] = useState('')
   const [tgl, setTgl] = useState('')
+  const [lihatTutup, setLihatTutup] = useState(false)
 
-  // Tanggal dihitung di HP setelah halaman tampil, BUKAN saat render.
-  // Kalau dihitung saat render, Next.js bisa membekukannya
-  // di tanggal saat aplikasi di-build (peringatan "new Date()").
   useEffect(() => {
     setTgl(tanggalHariIni())
   }, [])
@@ -39,15 +37,16 @@ export default function TellerBeranda() {
   if (galat) return <main className="layar"><div className="kartu" style={{ marginTop: 40 }}>{galat}</div></main>
 
   const aktif = (rek ?? []).filter((r) => r.status === 'aktif')
+  const ditutup = (rek ?? []).filter((r) => r.status === 'ditutup')
   const total = aktif.reduce((s, r) => s + r.saldo, 0)
   const q = cari.trim().toLowerCase()
-  const tampil = aktif.filter(
-    (r) =>
-      !q ||
-      r.no_rekening.toLowerCase().includes(q) ||
-      r.warga?.nama_kk.toLowerCase().includes(q) ||
-      r.warga?.no_rumah.toLowerCase().includes(q)
-  )
+  const cocok = (r: Rekening) =>
+    !q ||
+    r.no_rekening.toLowerCase().includes(q) ||
+    !!r.warga?.nama_kk.toLowerCase().includes(q) ||
+    !!r.warga?.no_rumah.toLowerCase().includes(q)
+  const tampil = aktif.filter(cocok)
+  const tampilTutup = ditutup.filter(cocok)
 
   function gantiMode(m: Mode) {
     setMode((lama) => (lama === m ? null : m))
@@ -108,6 +107,16 @@ export default function TellerBeranda() {
         </div>
       )}
 
+      {pengguna?.warga_id && !mode && (
+        <Link href="/tabungan" className="spanduk info" style={{ justifyContent: 'space-between' }}>
+          <span style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+            <Ikon nama="orang" ukuran={18} />
+            Lihat tabungan saya
+          </span>
+          <span className="tebal">›</span>
+        </Link>
+      )}
+
       <div className="cari">
         <Ikon nama="cari" ukuran={18} />
         <input
@@ -130,7 +139,7 @@ export default function TellerBeranda() {
         {rek === null && <p className="redup" style={{ padding: '14px 0' }}>Memuat…</p>}
         {rek !== null && tampil.length === 0 && (
           <p className="redup" style={{ padding: '14px 0' }}>
-            {aktif.length === 0 ? 'Belum ada rekening. Tekan "Buka Rek." untuk mulai.' : 'Tidak ditemukan.'}
+            {aktif.length === 0 ? 'Belum ada rekening aktif. Tekan "Buka Rek." untuk mulai.' : 'Tidak ditemukan.'}
           </p>
         )}
 
@@ -155,6 +164,37 @@ export default function TellerBeranda() {
           )
         })}
       </div>
+
+      {/* ---------- REKENING DITUTUP ---------- */}
+      {ditutup.length > 0 && (
+        <>
+          <button
+            className="judul-bagian"
+            onClick={() => setLihatTutup((v) => !v)}
+            aria-expanded={lihatTutup}
+            style={{ background: 'none', border: 0, width: 'calc(100% - 40px)', marginTop: 24 }}
+          >
+            <span>Rekening ditutup ({ditutup.length})</span>
+            <span className="redup kecil">{lihatTutup ? 'Sembunyikan' : 'Tampilkan'}</span>
+          </button>
+          {lihatTutup && (
+            <div className="daftar">
+              {tampilTutup.length === 0 && <p className="redup" style={{ padding: '14px 0' }}>Tidak ditemukan.</p>}
+              {tampilTutup.map((r) => (
+                <Link key={r.id} href={`/teller/rekening/${r.id}`} className="baris">
+                  <span className="avatar" style={{ background: '#EDF1F4', color: 'var(--redup)' }}>
+                    {inisial(r.warga?.nama_kk ?? '?')}
+                  </span>
+                  <span className="isi">
+                    <span className="nama" style={{ color: 'var(--redup)' }}>{r.warga?.nama_kk}</span>
+                    <span className="redup kecil">{r.warga?.no_rumah} · {r.no_rekening} · ditutup</span>
+                  </span>
+                </Link>
+              ))}
+            </div>
+          )}
+        </>
+      )}
     </main>
   )
 }

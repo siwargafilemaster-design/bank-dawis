@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import { awalHariIniISO, hariIniWIB, JENIS_MASUK } from './format'
+import { awalHariIniISO, hariIniWIB, JENIS_MASUK, awalPeriodeISO, geserPeriode } from './format'
 
 export type Warga = {
   id: string
@@ -200,4 +200,76 @@ export async function gantiPin(pinBaru: string): Promise<void> {
   }
   const { error: e2 } = await supabase.rpc('selesai_ganti_pin')
   if (e2) throw new Error(e2.message)
+}
+
+// ===================== Tahap 4: nasabah & buka kembali =====================
+
+export type RekeningSaya = {
+  id: string
+  no_rekening: string
+  saldo: number
+  status: 'aktif' | 'ditutup'
+  dibuka_pada: string
+}
+
+// Nasabah tidak boleh membaca tabel warga, jadi rekening diambil tanpa embed warga
+export async function rekeningSaya(wargaId: string): Promise<RekeningSaya | null> {
+  const { data, error } = await supabase
+    .from('rekening')
+    .select('id, no_rekening, saldo, status, dibuka_pada')
+    .eq('warga_id', wargaId)
+    .maybeSingle()
+  if (error) throw error
+  return data as RekeningSaya | null
+}
+
+// Mutasi satu bulan, urut LAMA → BARU
+export async function mutasiBulan(rekeningId: string, periode: string): Promise<Mutasi[]> {
+  const { data, error } = await supabase
+    .from('mutasi')
+    .select(KOLOM_MUTASI)
+    .eq('rekening_id', rekeningId)
+    .gte('dibuat', awalPeriodeISO(periode))
+    .lt('dibuat', awalPeriodeISO(geserPeriode(periode, 1)))
+    .order('id', { ascending: true })
+  if (error) throw error
+  return (data ?? []) as Mutasi[]
+}
+
+// Saldo tepat sebelum waktu tertentu = saldo_setelah mutasi terakhir sebelumnya
+export async function saldoSebelum(rekeningId: string, iso: string): Promise<number> {
+  const { data, error } = await supabase
+    .from('mutasi')
+    .select('saldo_setelah')
+    .eq('rekening_id', rekeningId)
+    .lt('dibuat', iso)
+    .order('id', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (error) throw error
+  return data?.saldo_setelah ?? 0
+}
+
+// Semua id mutasi yang pernah dikoreksi (bisa dikoreksi di bulan lain)
+export async function idDikoreksi(rekeningId: string): Promise<Set<number>> {
+  const { data, error } = await supabase
+    .from('mutasi')
+    .select('koreksi_dari')
+    .eq('rekening_id', rekeningId)
+    .not('koreksi_dari', 'is', null)
+  if (error) throw error
+  return new Set((data ?? []).map((x) => x.koreksi_dari as number))
+}
+
+export async function kontakTeller(): Promise<{ nama: string; no_wa: string } | null> {
+  const { data, error } = await supabase.rpc('bank_kontak_teller')
+  if (error) throw error
+  return (data ?? [])[0] ?? null
+}
+
+export async function bukaKembali(rekeningId: string): Promise<void> {
+  const { error } = await supabase.rpc('bank_buka_kembali', {
+    p_rekening_id: rekeningId,
+  })
+  if (error) throw new Error(error.message)
 }

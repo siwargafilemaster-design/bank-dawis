@@ -223,3 +223,40 @@ label.label { display: block; font-size: 13px; font-weight: 600; margin: 16px 0 
   display: flex; flex-direction: column; gap: 6px; font-size: 14px;
 }
 .ringkas div { display: flex; justify-content: space-between; gap: 12px; }
+
+/* ---------- Tahap 4: nasabah ---------- */
+.layar.nasabah { padding-bottom: 0; }
+
+.nav-bawah {
+  position: sticky; bottom: 0; margin-top: auto;
+  background: #fff; border-top: 1px solid #E3E9ED;
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  padding: 8px 0 calc(12px + env(safe-area-inset-bottom));
+}
+.nav-bawah a {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 6px 0; font-size: 11px; color: var(--redup);
+}
+.nav-bawah a.aktif { color: var(--utama); font-weight: 600; }
+
+.lencana-baru {
+  font-size: 10px; font-weight: 600; color: #fff; background: var(--utama);
+  padding: 2px 6px; border-radius: 6px; margin-left: 6px; vertical-align: middle;
+}
+
+.ikon-mutasi {
+  width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.ikon-mutasi.masuk { background: var(--hijau-muda); color: var(--hijau); }
+.ikon-mutasi.keluar { background: var(--merah-muda); color: var(--merah); }
+
+.chips-bulan { display: flex; gap: 8px; overflow-x: auto; padding: 4px 20px 16px; background: #fff; }
+.chips-bulan .chip { flex-shrink: 0; padding: 0 16px; }
+
+.tanggal-kelompok {
+  margin: 20px 20px 8px; font-size: 12px; font-weight: 600;
+  color: var(--redup); text-transform: uppercase;
+}
+
+.menu-cepat .tidak-aktif { opacity: .4; pointer-events: none; }

@@ -6,7 +6,7 @@ import { useParams } from 'next/navigation'
 import { usePengguna } from '@/lib/sesi'
 import {
   ambilRekening, ambilMutasi, sudahKeluar, statusAkun,
-  kelolaAkun, koreksiMutasi, tutupRekening,
+  kelolaAkun, koreksiMutasi, tutupRekening, bukaKembali,
   type Rekening, type Mutasi,
 } from '@/lib/bank'
 import { rupiah, tanggalJam, hpTampil, pinLemah, LABEL_JENIS, JENIS_MASUK } from '@/lib/format'
@@ -19,6 +19,7 @@ type LembarAktif =
   | { jenis: 'akun'; aksi: 'buat' | 'reset' }
   | { jenis: 'koreksi'; m: Mutasi }
   | { jenis: 'tutup' }
+  | { jenis: 'bukaKembali' }
 
 export default function DetailRekening() {
   const { id } = useParams<{ id: string }>()
@@ -75,12 +76,13 @@ export default function DetailRekening() {
     mutasi.map((m) => m.koreksi_dari).filter((x): x is number => x !== null)
   )
   const aktif = rek.status === 'aktif'
+  const keluarDawis = sudahKeluar(rek.warga)
   const milikSendiri = rek.warga_id === pengguna?.warga_id
 
   return (
     <main className="layar">
       {/* ---------- KEPALA ---------- */}
-      <div style={{ background: 'var(--utama)', color: '#fff', padding: '16px 12px 24px' }}>
+      <div style={{ background: aktif ? 'var(--utama)' : '#5E6B76', color: '#fff', padding: '16px 12px 24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           <Link href="/teller" aria-label="Kembali" className="tombol-ikon" style={{ background: 'none' }}>
             <Ikon nama="kembali" ukuran={22} />
@@ -88,7 +90,7 @@ export default function DetailRekening() {
           <h1 style={{ fontSize: 17, fontWeight: 600 }}>{rek.warga?.nama_kk}</h1>
         </div>
         <div style={{ padding: '8px 12px 0' }}>
-          <span style={{ fontSize: 12, color: '#CDE9F1' }}>
+          <span style={{ fontSize: 12, color: '#E3EAF0' }}>
             {rek.warga?.no_rumah} · {rek.no_rekening} · {aktif ? 'aktif' : 'DITUTUP'}
           </span>
           <p style={{ fontSize: 30, fontWeight: 700, marginTop: 6 }}>{rupiah(rek.saldo)}</p>
@@ -102,7 +104,7 @@ export default function DetailRekening() {
         </div>
       )}
 
-      {aktif && sudahKeluar(rek.warga) && (
+      {aktif && keluarDawis && (
         <div className="spanduk bahaya">
           <Ikon nama="info" ukuran={18} />
           Anggota ini sudah keluar dari Dawis. Segera lakukan penutupan rekening.
@@ -118,6 +120,21 @@ export default function DetailRekening() {
           <Link href={`/teller/rekening/${rek.id}/tarik`} className="tombol garis">
             <Ikon nama="keluar" ukuran={20} />Tarik
           </Link>
+        </div>
+      )}
+
+      {/* ---------- BUKA KEMBALI ---------- */}
+      {!aktif && (
+        <div style={{ margin: '16px 20px 0' }}>
+          {keluarDawis ? (
+            <p className="redup kecil" style={{ textAlign: 'center' }}>
+              Anggota ini sudah keluar dari Dawis, jadi rekening tidak bisa dibuka kembali.
+            </p>
+          ) : (
+            <button className="tombol garis" onClick={() => setLembar({ jenis: 'bukaKembali' })}>
+              Buka kembali rekening
+            </button>
+          )}
         </div>
       )}
 
@@ -209,6 +226,9 @@ export default function DetailRekening() {
       )}
       {lembar?.jenis === 'tutup' && (
         <LembarTutup rek={rek} tutup={() => setLembar(null)} selesai={selesai} />
+      )}
+      {lembar?.jenis === 'bukaKembali' && (
+        <LembarBukaKembali rek={rek} tutup={() => setLembar(null)} selesai={selesai} />
       )}
     </main>
   )
@@ -382,7 +402,7 @@ function LembarTutup({
       </div>
 
       <p className="redup kecil" style={{ marginTop: 12, lineHeight: 1.5 }}>
-        Sisa saldo dicatat sebagai <b>penarikan penutupan</b>. Rekening tidak bisa dipakai lagi, tapi riwayatnya tetap tersimpan dan akun aplikasi nasabah (kalau ada) tetap bisa melihatnya.
+        Sisa saldo dicatat sebagai <b>penarikan penutupan</b>. Rekening bisa dibuka kembali nanti (mulai dari Rp 0) selama anggota belum keluar dari Dawis.
       </p>
 
       <label className="label" htmlFor="cat-tutup">Catatan (opsional)</label>
@@ -412,6 +432,52 @@ function LembarTutup({
         disabled={sibuk || (adaSaldo && !sudahSerah)}
       >
         {sibuk ? 'Memproses…' : 'Tutup rekening'}
+      </button>
+    </Lembar>
+  )
+}
+
+// =====================================================================
+// LEMBAR: BUKA KEMBALI (baru di Tahap 4)
+// =====================================================================
+function LembarBukaKembali({
+  rek, tutup, selesai,
+}: {
+  rek: Rekening
+  tutup: () => void
+  selesai: (teks: string) => void
+}) {
+  const [sibuk, setSibuk] = useState(false)
+  const [galat, setGalat] = useState('')
+
+  async function kirim() {
+    setSibuk(true)
+    setGalat('')
+    try {
+      await bukaKembali(rek.id)
+      selesai(`Rekening ${rek.no_rekening} aktif kembali.`)
+    } catch (e) {
+      setGalat((e as Error).message)
+      setSibuk(false)
+    }
+  }
+
+  return (
+    <Lembar judul="Buka kembali rekening" tutup={tutup}>
+      <div className="ringkas">
+        <div><span className="redup">Nasabah</span><span>{rek.warga?.nama_kk}</span></div>
+        <div><span className="redup">Rekening</span><span>{rek.no_rekening}</span></div>
+        <div><span className="tebal">Saldo awal</span><span className="tebal">Rp 0</span></div>
+      </div>
+
+      <p className="redup kecil" style={{ marginTop: 12, lineHeight: 1.5 }}>
+        Rekening diaktifkan lagi dengan nomor dan riwayat yang sama. Kalau rekening ini tertutup karena salah tekan, minta nasabah menyerahkan kembali uangnya lalu catat lewat <b>Setor</b>.
+      </p>
+
+      {galat && <p className="galat">{galat}</p>}
+
+      <button className="tombol" style={{ marginTop: 20 }} onClick={kirim} disabled={sibuk}>
+        {sibuk ? 'Memproses…' : 'Ya, buka kembali'}
       </button>
     </Lembar>
   )
