@@ -9,6 +9,7 @@ import { rupiah, tanggalJam, salam, bacaLokal, tulisLokal, LABEL_JENIS, JENIS_MA
 import { normalWa } from '@/lib/nomor'
 import { Ikon } from '@/components/ikon'
 import { NavNasabah } from '@/components/nav-nasabah'
+import { Memuat } from '@/components/memuat'
 
 export default function Tabungan() {
   const { pengguna, galat } = usePengguna()
@@ -67,7 +68,8 @@ export default function Tabungan() {
   }
 
   if (galat) return <main className="layar"><div className="kartu" style={{ marginTop: 40 }}>{galat}</div></main>
-
+    if (rek === undefined && !pesan) return <Memuat />
+    
   const teller = pengguna?.peran.includes('teller')
 
   return (

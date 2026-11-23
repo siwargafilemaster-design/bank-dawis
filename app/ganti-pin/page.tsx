@@ -7,6 +7,7 @@ import { usePengguna, keluar } from '@/lib/sesi'
 import { gantiPin } from '@/lib/bank'
 import { pinLemah } from '@/lib/format'
 import { Ikon } from '@/components/ikon'
+import { Memuat } from '@/components/memuat'
 
 export default function GantiPin() {
   const router = useRouter()
@@ -35,7 +36,7 @@ export default function GantiPin() {
   }
 
   if (galat) return <main className="layar"><div className="kartu" style={{ marginTop: 40 }}>{galat}</div></main>
-  if (!pengguna) return <main className="layar"><p className="redup" style={{ padding: 40 }}>Memuat…</p></main>
+    if (!pengguna) return <Memuat />
 
   const wajib = pengguna.wajib_ganti_pin
 

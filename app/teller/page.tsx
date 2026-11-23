@@ -7,6 +7,7 @@ import { usePengguna, keluar } from '@/lib/sesi'
 import { daftarRekening, ringkasanHariIni, sudahKeluar, type Rekening } from '@/lib/bank'
 import { rupiah, tanggalHariIni, inisial } from '@/lib/format'
 import { Ikon } from '@/components/ikon'
+import { Memuat } from '@/components/memuat'
 
 type Mode = null | 'setor' | 'tarik'
 
@@ -32,9 +33,10 @@ export default function TellerBeranda() {
         setHari(h)
       })
       .catch((e) => setPesan('Gagal memuat: ' + e.message))
-  }, [pengguna])
+    }, [pengguna])
 
   if (galat) return <main className="layar"><div className="kartu" style={{ marginTop: 40 }}>{galat}</div></main>
+  if (rek === null && !pesan) return <Memuat />
 
   const aktif = (rek ?? []).filter((r) => r.status === 'aktif')
   const ditutup = (rek ?? []).filter((r) => r.status === 'ditutup')

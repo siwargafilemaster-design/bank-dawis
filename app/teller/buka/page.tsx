@@ -7,6 +7,7 @@ import { usePengguna } from '@/lib/sesi'
 import { wargaTanpaRekening, bukaRekening, type Warga } from '@/lib/bank'
 import { inisial } from '@/lib/format'
 import { Ikon } from '@/components/ikon'
+import { Memuat } from '@/components/memuat'
 
 export default function BukaRekening() {
   const router = useRouter()
@@ -45,7 +46,8 @@ export default function BukaRekening() {
   }
 
   if (galat) return <main className="layar"><div className="kartu" style={{ marginTop: 40 }}>{galat}</div></main>
-
+    if (warga === null && !pesan) return <Memuat />
+    
   const q = cari.trim().toLowerCase()
   const tampil = (warga ?? []).filter(
     (w) => !q || w.nama_kk.toLowerCase().includes(q) || w.no_rumah.toLowerCase().includes(q)

@@ -15,6 +15,7 @@ export type Rekening = {
   status: 'aktif' | 'ditutup'
   dibuka_pada: string
   warga_id: string
+  dibuka_kembali_pada: string | null
   warga: {
     no_rumah: string
     nama_kk: string
@@ -35,8 +36,7 @@ export type Mutasi = {
 }
 
 const KOLOM_REK =
-  'id, no_rekening, saldo, status, dibuka_pada, warga_id, warga(no_rumah, nama_kk, tgl_keluar, no_wa)'
-
+  'id, no_rekening, saldo, status, dibuka_pada, dibuka_kembali_pada, warga_id, warga(no_rumah, nama_kk, tgl_keluar, no_wa)'
 const KOLOM_MUTASI =
   'id, jenis, nominal, saldo_setelah, catatan, teller_nama, koreksi_dari, dibuat'
 

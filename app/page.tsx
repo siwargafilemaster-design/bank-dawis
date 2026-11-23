@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { usePengguna } from '@/lib/sesi'
+import { Memuat } from '@/components/memuat'
 
 export default function Pembagi() {
   const router = useRouter()
@@ -13,13 +14,8 @@ export default function Pembagi() {
     router.replace(pengguna.peran.includes('teller') ? '/teller' : '/tabungan')
   }, [pengguna, router])
 
-  return (
-    <main className="layar">
-      {galat ? (
-        <div className="kartu" style={{ marginTop: 40 }}>{galat}</div>
-      ) : (
-        <p className="redup" style={{ padding: 40 }}>Memuat…</p>
-      )}
-    </main>
-  )
+  if (galat) {
+    return <main className="layar"><div className="kartu" style={{ marginTop: 40 }}>{galat}</div></main>
+  }
+  return <Memuat />
 }

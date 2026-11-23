@@ -260,3 +260,45 @@ label.label { display: block; font-size: 13px; font-weight: 600; margin: 16px 0 
 }
 
 .menu-cepat .tidak-aktif { opacity: .4; pointer-events: none; }
+
+/* ---------- Tahap 4B: layar memuat ---------- */
+.pemuat {
+  min-height: 100dvh; background: #fff;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 20px;
+}
+.pemuat p { color: var(--redup); font-size: 14px; text-align: center; }
+
+.pemuat-bingkai {
+  position: relative; width: 96px; height: 96px;
+  border-radius: 26px; overflow: hidden; background: #E3F4F9;
+  display: flex; align-items: center; justify-content: center;
+}
+/* garis yang berjalan mengelilingi pinggir */
+.pemuat-bingkai::before {
+  content: '';
+  position: absolute; top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg 240deg,
+    #1AAFD0 320deg,
+    var(--utama) 360deg
+  );
+  animation: bd-putar 1.4s linear infinite;
+}
+/* logo di tengah, berkedip */
+.pemuat-logo {
+  position: relative; border-radius: 22px; background: #fff;
+  animation: bd-kedip 1.4s ease-in-out infinite;
+}
+
+@keyframes bd-putar { to { transform: rotate(360deg); } }
+@keyframes bd-kedip {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .35; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pemuat-bingkai::before, .pemuat-logo { animation: none; }
+}

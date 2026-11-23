@@ -14,6 +14,7 @@ import {
 import { unduhStatement } from '@/lib/statement'
 import { Ikon } from '@/components/ikon'
 import { NavNasabah } from '@/components/nav-nasabah'
+import { Memuat } from '@/components/memuat'
 
 export default function MutasiNasabah() {
   const { pengguna, galat } = usePengguna()
@@ -90,6 +91,7 @@ export default function MutasiNasabah() {
   }
 
   if (galat) return <main className="layar"><div className="kartu" style={{ marginTop: 40 }}>{galat}</div></main>
+    if (rek === undefined && !pesan) return <Memuat />
 
   // ringkasan & pengelompokan per tanggal (terbaru di atas)
   let masuk = 0

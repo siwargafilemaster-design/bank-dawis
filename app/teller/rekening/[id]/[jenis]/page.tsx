@@ -7,8 +7,9 @@ import { usePengguna } from '@/lib/sesi'
 import { ambilRekening, simpanTransaksi, type Rekening, type Mutasi } from '@/lib/bank'
 import { rupiah, inisial } from '@/lib/format'
 import { Ikon } from '@/components/ikon'
+import { Memuat } from '@/components/memuat'
 
-const CEPAT = [10000, 20000, 50000, 100000]
+const CEPAT = [5000, 10000, 20000, 50000]
 type Tahap = 'isi' | 'konfirmasi' | 'selesai'
 
 export default function FormTransaksi() {
@@ -53,7 +54,10 @@ export default function FormTransaksi() {
     return <main className="layar"><p style={{ padding: 20 }}>Halaman tidak dikenal.</p></main>
   }
   if (galat) return <main className="layar"><div className="kartu" style={{ marginTop: 40 }}>{galat}</div></main>
-  if (!rek) return <main className="layar"><p className="redup" style={{ padding: 20 }}>{pesan || 'Memuat…'}</p></main>
+  if (!rek) {
+  if (!pesan) return <Memuat />
+    return <main className="layar"><p className="redup" style={{ padding: 20 }}>{pesan}</p></main>
+  }
 
   const setor = jenis === 'setor'
   const judul = setor ? 'Setor tunai' : 'Tarik tunai'

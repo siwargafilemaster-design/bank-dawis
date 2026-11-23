@@ -12,6 +12,7 @@ import {
 import { rupiah, tanggalJam, hpTampil, pinLemah, LABEL_JENIS, JENIS_MASUK } from '@/lib/format'
 import { Ikon } from '@/components/ikon'
 import { Lembar } from '@/components/lembar'
+import { Memuat } from '@/components/memuat'
 
 type Akun = { ada: boolean; wajibGantiPin: boolean }
 type LembarAktif =
@@ -60,7 +61,8 @@ export default function DetailRekening() {
 
   if (galat) return <main className="layar"><div className="kartu" style={{ marginTop: 40 }}>{galat}</div></main>
 
-  if (!rek) {
+    if (!rek) {
+    if (pesan === 'Memuat…') return <Memuat />
     return (
       <main className="layar">
         <div className="atas">
@@ -181,7 +183,11 @@ export default function DetailRekening() {
         {mutasi.map((m) => {
           const masuk = JENIS_MASUK.has(m.jenis)
           const coret = dikoreksi.has(m.id)
-          const bisaKoreksi = aktif && !coret && (m.jenis === 'setor' || m.jenis === 'tarik')
+          const terkunci =
+            !!rek.dibuka_kembali_pada &&
+            new Date(m.dibuat).getTime() < new Date(rek.dibuka_kembali_pada).getTime()
+          const bisaKoreksi =
+            aktif && !coret && !terkunci && (m.jenis === 'setor' || m.jenis === 'tarik')
           return (
             <button
               key={m.id}
