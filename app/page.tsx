@@ -11,7 +11,12 @@ export default function Pembagi() {
 
   useEffect(() => {
     if (!pengguna) return
-    router.replace(pengguna.peran.includes('teller') ? '/teller' : '/tabungan')
+    const peran = pengguna.peran
+    router.replace(
+      peran.includes('teller') ? '/teller'
+        : peran.includes('pengawas') ? '/pengawas'
+          : '/tabungan'
+    )
   }, [pengguna, router])
 
   if (galat) {

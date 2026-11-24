@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import { awalHariIniISO, hariIniWIB, JENIS_MASUK, awalPeriodeISO, geserPeriode } from './format'
+import { awalHariIniISO, hariIniWIB, JENIS_MASUK, awalPeriodeISO, geserPeriode, awalTahunISO } from './format'
 
 export type Warga = {
   id: string
@@ -272,4 +272,64 @@ export async function bukaKembali(rekeningId: string): Promise<void> {
     p_rekening_id: rekeningId,
   })
   if (error) throw new Error(error.message)
+}
+
+// ===================== Tahap 5: tahunan, pengawas, tutup kas =====================
+
+// Mutasi satu tahun, urut LAMA → BARU
+export async function mutasiTahun(rekeningId: string, tahun: number): Promise<Mutasi[]> {
+  const { data, error } = await supabase
+    .from('mutasi')
+    .select(KOLOM_MUTASI)
+    .eq('rekening_id', rekeningId)
+    .gte('dibuat', awalTahunISO(tahun))
+    .lt('dibuat', awalTahunISO(tahun + 1))
+    .order('id', { ascending: true })
+  if (error) throw error
+  return (data ?? []) as Mutasi[]
+}
+
+export type MutasiLengkap = Mutasi & {
+  rekening: { no_rekening: string; warga: { nama_kk: string } | null } | null
+}
+
+export async function mutasiSemua(hanyaKoreksi: boolean, batas = 50): Promise<MutasiLengkap[]> {
+  let q = supabase
+    .from('mutasi')
+    .select(`${KOLOM_MUTASI}, rekening(no_rekening, warga(nama_kk))`)
+  if (hanyaKoreksi) q = q.in('jenis', ['koreksi_masuk', 'koreksi_keluar'])
+  const { data, error } = await q.order('id', { ascending: false }).limit(batas)
+  if (error) throw error
+  return (data ?? []) as unknown as MutasiLengkap[]
+}
+
+export type TutupKas = {
+  id: number
+  dibuat: string
+  teller_nama: string | null
+  saldo_sistem: number
+  uang_fisik: number
+  selisih: number
+  masuk_hari_ini: number
+  keluar_hari_ini: number
+  catatan: string | null
+}
+
+export async function riwayatTutupKas(batas = 10): Promise<TutupKas[]> {
+  const { data, error } = await supabase
+    .from('tutup_kas')
+    .select('id, dibuat, teller_nama, saldo_sistem, uang_fisik, selisih, masuk_hari_ini, keluar_hari_ini, catatan')
+    .order('id', { ascending: false })
+    .limit(batas)
+  if (error) throw error
+  return (data ?? []) as TutupKas[]
+}
+
+export async function tutupKasHarian(uangFisik: number, catatan: string): Promise<TutupKas> {
+  const { data, error } = await supabase.rpc('bank_tutup_kas', {
+    p_uang_fisik: uangFisik,
+    p_catatan: catatan.trim() || null,
+  })
+  if (error) throw new Error(error.message)
+  return data as TutupKas
 }

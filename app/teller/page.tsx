@@ -97,9 +97,9 @@ export default function TellerBeranda() {
         <Link href="/teller/buka">
           <span className="ikon"><Ikon nama="tambahOrang" /></span>Buka Rek.
         </Link>
-        <button disabled title="Tahap 5">
+        <Link href="/teller/tutup-kas">
           <span className="ikon"><Ikon nama="kas" /></span>Tutup Kas
-        </button>
+        </Link>
       </div>
 
       {mode && (

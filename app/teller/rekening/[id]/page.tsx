@@ -13,6 +13,7 @@ import { rupiah, tanggalJam, hpTampil, pinLemah, LABEL_JENIS, JENIS_MASUK } from
 import { Ikon } from '@/components/ikon'
 import { Lembar } from '@/components/lembar'
 import { Memuat } from '@/components/memuat'
+import { KotakPin } from '@/components/kotak-pin'
 
 type Akun = { ada: boolean; wajibGantiPin: boolean }
 type LembarAktif =
@@ -285,15 +286,7 @@ function LembarAkun({
       <label className="label" htmlFor="pin-awal">
         {buat ? 'PIN awal' : 'PIN sementara'} (6 angka)
       </label>
-      <input
-        id="pin-awal"
-        className="isian pin"
-        inputMode="numeric"
-        autoComplete="off"
-        maxLength={6}
-        value={pin}
-        onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
-      />
+       <KotakPin id="pin-awal" value={pin} onChange={setPin} label="PIN 6 angka" tampak />
       <p className="redup kecil" style={{ marginTop: 8, lineHeight: 1.5 }}>
         PIN ini terlihat oleh teller, jadi nasabah <b>wajib</b> menggantinya saat login berikutnya.
       </p>

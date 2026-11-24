@@ -149,3 +149,37 @@ export function tulisLokal(kunci: string, nilai: string): void {
     /* abaikan */
   }
 }
+
+// ===================== Tahap 5: periode tahun =====================
+
+export function tahunSekarang(): number {
+  return Number(hariIniWIB().slice(0, 4))
+}
+
+export function tahunDari(iso: string): number {
+  return Number(periodeDari(iso).slice(0, 4))
+}
+
+// batas tahun: "1 Jan tahun ini" s/d "sebelum 1 Jan tahun berikutnya"
+export function awalTahunISO(tahun: number): string {
+  return `${tahun}-01-01T00:00:00+07:00`
+}
+
+// "November 2026" — untuk judul kelompok per bulan
+export function judulBulan(iso: string): string {
+  return new Intl.DateTimeFormat('id-ID', {
+    timeZone: ZONA,
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date(iso))
+}
+
+// "23 Nov 2026"
+export function tanggalPendek(iso: string): string {
+  return new Intl.DateTimeFormat('id-ID', {
+    timeZone: ZONA,
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(iso))
+}

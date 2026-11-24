@@ -30,6 +30,7 @@ export default function Akun() {
   if (galat) return <main className="layar"><div className="kartu" style={{ marginTop: 40 }}>{galat}</div></main>
 
   const teller = pengguna?.peran.includes('teller')
+  const modeKerja = teller ? '/teller' : pengguna?.peran.includes('pengawas') ? '/pengawas' : null
 
   return (
     <main className="layar nasabah">
@@ -51,10 +52,10 @@ export default function Akun() {
           <span className="ikon-mutasi" style={{ background: '#E3F4F9', color: 'var(--utama)' }}><Ikon nama="gembok" ukuran={20} /></span>
           <span className="isi"><span className="nama">Ganti PIN</span></span>
         </Link>
-        {teller && (
-          <Link href="/teller" className="baris">
+       {modeKerja && (
+          <Link href={modeKerja} className="baris">
             <span className="ikon-mutasi" style={{ background: '#E3F4F9', color: 'var(--utama)' }}><Ikon nama="tukar" ukuran={20} /></span>
-            <span className="isi"><span className="nama">Kembali ke mode teller</span></span>
+            <span className="isi"><span className="nama">Kembali ke mode {teller ? 'teller' : 'pengawas'}</span></span>
           </Link>
         )}
         <button className="baris" onClick={keluar}>

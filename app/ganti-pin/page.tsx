@@ -8,6 +8,7 @@ import { gantiPin } from '@/lib/bank'
 import { pinLemah } from '@/lib/format'
 import { Ikon } from '@/components/ikon'
 import { Memuat } from '@/components/memuat'
+import { KotakPin } from '@/components/kotak-pin'
 
 export default function GantiPin() {
   const router = useRouter()
@@ -36,7 +37,7 @@ export default function GantiPin() {
   }
 
   if (galat) return <main className="layar"><div className="kartu" style={{ marginTop: 40 }}>{galat}</div></main>
-    if (!pengguna) return <Memuat />
+  if (!pengguna) return <Memuat />
 
   const wajib = pengguna.wajib_ganti_pin
 
@@ -52,9 +53,7 @@ export default function GantiPin() {
         <Ikon nama="gembok" ukuran={30} />
       </span>
 
-      <h1 style={{ fontSize: 22, fontWeight: 600 }}>
-        {wajib ? 'Buat PIN baru' : 'Ganti PIN'}
-      </h1>
+      <h1 style={{ fontSize: 22, fontWeight: 600 }}>{wajib ? 'Buat PIN baru' : 'Ganti PIN'}</h1>
       <p className="redup" style={{ fontSize: 14, lineHeight: 1.6, marginTop: 6 }}>
         {wajib
           ? 'PIN dari teller hanya sementara. Ganti dengan PIN rahasia yang hanya Ibu yang tahu.'
@@ -63,28 +62,10 @@ export default function GantiPin() {
 
       <form onSubmit={simpan} style={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
         <label className="label" htmlFor="pin1">PIN baru</label>
-        <input
-          id="pin1"
-          className="isian pin"
-          type="password"
-          inputMode="numeric"
-          autoComplete="new-password"
-          maxLength={6}
-          value={pin1}
-          onChange={(e) => setPin1(e.target.value.replace(/\D/g, ''))}
-        />
+        <KotakPin id="pin1" value={pin1} onChange={setPin1} label="PIN baru 6 angka" autoComplete="new-password" />
 
         <label className="label" htmlFor="pin2">Ulangi PIN baru</label>
-        <input
-          id="pin2"
-          className="isian pin"
-          type="password"
-          inputMode="numeric"
-          autoComplete="new-password"
-          maxLength={6}
-          value={pin2}
-          onChange={(e) => setPin2(e.target.value.replace(/\D/g, ''))}
-        />
+        <KotakPin id="pin2" value={pin2} onChange={setPin2} label="Ulangi PIN baru" autoComplete="new-password" />
 
         <div className="spanduk" style={{ margin: '20px 0 0' }}>
           <Ikon nama="info" ukuran={18} />

@@ -10,6 +10,7 @@ import { normalWa } from '@/lib/nomor'
 import { Ikon } from '@/components/ikon'
 import { NavNasabah } from '@/components/nav-nasabah'
 import { Memuat } from '@/components/memuat'
+import { IDENTITAS } from '@/lib/identitas'
 
 export default function Tabungan() {
   const { pengguna, galat } = usePengguna()
@@ -71,6 +72,7 @@ export default function Tabungan() {
     if (rek === undefined && !pesan) return <Memuat />
     
   const teller = pengguna?.peran.includes('teller')
+  const modeKerja = teller ? '/teller' : pengguna?.peran.includes('pengawas') ? '/pengawas' : null
 
   return (
     <main className="layar nasabah">
@@ -82,14 +84,18 @@ export default function Tabungan() {
             <span style={{ fontSize: 12, color: '#CDE9F1' }}>{sapa},</span>
             <span style={{ fontSize: 17, fontWeight: 600 }}>{pengguna?.nama ?? '…'}</span>
           </div>
-          {teller && (
-            <Link href="/teller" className="tombol-ikon" aria-label="Mode teller">
+          {modeKerja && (
+            <Link href={modeKerja} className="tombol-ikon" aria-label={teller ? 'Mode teller' : 'Mode pengawas'}>
               <Ikon nama="tukar" ukuran={20} />
             </Link>
           )}
           <button className="tombol-ikon" onClick={keluar} aria-label="Keluar">
             <Ikon nama="logout" ukuran={20} />
           </button>
+        </div>
+        <div className="pita-dawis">
+          <Image src={IDENTITAS.logoDawis} alt="" width={24} height={24} />
+          <span><b>{IDENTITAS.namaDawis}</b> · {IDENTITAS.lokasi}</span>
         </div>
       </div>
 
