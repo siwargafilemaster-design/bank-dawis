@@ -94,7 +94,7 @@ export default function Tabungan() {
           </button>
         </div>
         <div className="pita-dawis">
-          <Image src={IDENTITAS.logoDawis} alt="" width={24} height={24} />
+          <Image src={IDENTITAS.logoDawisKecil} alt="" width={32} height={32} />
           <span><b>{IDENTITAS.namaDawis}</b> · {IDENTITAS.lokasi}</span>
         </div>
       </div>

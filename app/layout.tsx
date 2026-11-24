@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Poppins } from 'next/font/google'
+import { DaftarSW } from '@/components/daftar-sw'
 import './globals.css'
 
 const poppins = Poppins({
@@ -11,6 +12,16 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: 'Bank Dawis',
   description: 'Tabungan anggota Dasa Wisma',
+  applicationName: 'Bank Dawis',
+  appleWebApp: {
+    capable: true,
+    title: 'Bank Dawis',
+    statusBarStyle: 'default',
+  },
+  icons: {
+    icon: '/icon-192.png',
+    apple: '/apple-touch-icon.png',
+  },
 }
 
 export const viewport: Viewport = {
@@ -26,7 +37,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id">
-      <body className={poppins.className}>{children}</body>
+      <body className={poppins.className}>
+        {children}
+        <DaftarSW />
+      </body>
     </html>
   )
 }

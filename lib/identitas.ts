@@ -5,5 +5,6 @@ export const IDENTITAS = {
   lokasi: 'Griya Gamersi Lalung',
   kota: 'Karanganyar',
   logoDawis: '/logo-gamersi.png',
+  logoDawisKecil: '/logo-gamersi-putih.png',
   logoAplikasi: '/ikon.jpg',
 } as const

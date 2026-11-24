@@ -329,9 +329,82 @@ label.label { display: block; font-size: 13px; font-weight: 600; margin: 16px 0 
   margin-top: 14px; display: inline-flex; align-items: center; gap: 8px;
   background: rgba(0, 0, 0, .16); border-radius: 999px; padding: 5px 12px 5px 5px; font-size: 12px;
 }
-.pita-dawis img { border-radius: 50%; background: #fff; object-fit: cover; }
+.pita-dawis img { object-fit: contain; }
 
 /* ---------- Tahap 5: pengawas & tutup kas ---------- */
 .lencana-status { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 6px; white-space: nowrap; }
 .lencana-status.cocok { background: var(--hijau-muda); color: #1F5F3A; }
 .lencana-status.selisih { background: var(--merah-muda); color: #8E3714; }
+
+/* =========================================================
+   Tahap 6: INTRO ANIMASI (layar login)
+   Kelas di <main>:  intro-tunggu → intro-aktif → intro-selesai
+   ========================================================= */
+
+.intro-bank { position: relative; width: 150px; height: 75px; overflow: hidden; flex-shrink: 0; }
+.intro-ikon, .intro-riak, .intro-kilau { display: none; }
+
+/* --- TUNGGU: sebelum JavaScript siap. Hanya ikon "da" di tengah,
+       persis seperti splash Android, supaya tidak ada kedipan. --- */
+.intro-tunggu .intro-isi { opacity: 0; }
+.intro-tunggu .intro-ikon,
+.intro-aktif .intro-ikon {
+  display: block; position: fixed; z-index: 10; pointer-events: none;
+  left: calc(50% - 44px); top: calc(50% - 44px); width: 88px; height: 88px;
+}
+
+/* --- AKTIF --- */
+
+/* 1. ikon "da": "digital" tersapu, ikon menempel ke huruf "da" logo, lalu lenyap */
+.intro-aktif .intro-ikon {
+  transform-origin: 44px 36.3px;
+  animation:
+    bd-ikon-potong .28s ease-in .3s both,
+    bd-ikon-geser .5s cubic-bezier(.65, 0, .35, 1) .3s both,
+    bd-ikon-hilang .1s linear .8s both;
+}
+@keyframes bd-ikon-potong { from { clip-path: inset(0 0 0 0); } to { clip-path: inset(0 0 34% 0); } }
+@keyframes bd-ikon-geser { to { transform: translate(-50.95px, 8.05px) scale(1.303); } }
+@keyframes bd-ikon-hilang { to { opacity: 0; } }
+
+/* 2. logo Bank Dawis: di tengah (jarak dihitung JS), "wis" tersapu, kilau, terbang ke posisinya */
+.intro-aktif .intro-bank {
+  animation:
+    bd-bank-gerak 2.4s cubic-bezier(.65, 0, .35, 1) both,
+    bd-muncul .01s linear .8s both;
+}
+@keyframes bd-bank-gerak {
+  0%, 66.7% { transform: translate(var(--bd-dx), var(--bd-dy)) scale(1.73); }
+  100% { transform: none; }
+}
+@keyframes bd-muncul { from { opacity: 0; } to { opacity: 1; } }
+
+.intro-aktif .intro-bank img { animation: bd-sapu .42s cubic-bezier(.2, .8, .2, 1) .8s both; }
+@keyframes bd-sapu { from { clip-path: inset(0 55% 0 15%); } to { clip-path: inset(0 0 0 0); } }
+
+.intro-aktif .intro-kilau {
+  display: block; position: absolute; top: 0; left: -70%; width: 45%; height: 100%;
+  background: linear-gradient(100deg, rgba(255,255,255,0), rgba(255,255,255,.85), rgba(255,255,255,0));
+  transform: skewX(-20deg);
+  animation: bd-kilau .6s ease-in-out 1.15s both;
+}
+@keyframes bd-kilau { from { left: -70%; } to { left: 140%; } }
+
+/* 3. riak di belakang logo saat "da" berubah jadi logo */
+.intro-aktif .intro-riak {
+  display: block; position: fixed; pointer-events: none;
+  left: calc(50% - 100px); top: calc(50% - 100px); width: 200px; height: 200px;
+  border-radius: 50%; border: 2px solid #1AAFD0;
+  animation: bd-riak 1.1s ease-out .8s both;
+}
+@keyframes bd-riak { 0% { opacity: .9; transform: scale(.45); } 100% { opacity: 0; transform: scale(2); } }
+
+/* 4. garis pemisah & logo Gamersi */
+.intro-aktif .co-brand-garis { animation: bd-garis .35s ease-out 2.25s both; }
+@keyframes bd-garis { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+.intro-aktif .intro-gamersi { animation: bd-gamersi .55s cubic-bezier(.2, .8, .2, 1) 2.35s both; }
+@keyframes bd-gamersi { from { opacity: 0; transform: translateX(48px) scale(.85); } to { opacity: 1; transform: none; } }
+
+/* 5. sisa halaman naik bergantian (jeda diatur di JSX) */
+.intro-aktif .intro-naik { animation: bd-naik .45s ease-out both; }
+@keyframes bd-naik { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
